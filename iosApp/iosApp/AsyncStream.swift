@@ -6,30 +6,38 @@ extension Flow {
     @MainActor
     func throwingStream<T>(_ type: T.Type) -> AsyncThrowingStream<T, Error> {
         AsyncThrowingStream<T, Error>() { cont in
-            Task {
-                do {
-                    try await FlowsKt.collecting(self) {
-                        cont.yield($0 as! T)
-                    }
+            let job = FlowsKt.collecting(self) {
+                cont.yield($0 as! T)
+            } onCompletion: {
+                if let error = $0 {
+                    cont.finish(throwing: error.asError())
+                } else {
                     cont.finish(throwing: nil)
-                } catch {
-                    cont.finish(throwing: error)
+                }
+            }
+            cont.onTermination = { @Sendable termination in
+                if case .cancelled = termination {
+                    job.cancel()
                 }
             }
         }
     }
-    
+
     @MainActor
     func stream<T>(_ type: T.Type) -> AsyncStream<T> {
         AsyncStream { cont in
-            Task {
-                do {
-                    try await FlowsKt.collecting(self) {
-                        cont.yield($0 as! T)
-                    }
+            let job = FlowsKt.collecting(self) {
+                cont.yield($0 as! T)
+            } onCompletion: {
+                if let error = $0 {
+                    fatalError(error.asError().localizedDescription)
+                } else {
                     cont.finish()
-                } catch {
-                    fatalError(error.localizedDescription)
+                }
+            }
+            cont.onTermination = { @Sendable termination in
+                if case .cancelled = termination {
+                    job.cancel()
                 }
             }
         }
