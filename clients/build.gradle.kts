@@ -10,7 +10,7 @@ kotlin {
         binaries {
             framework {
                 baseName = "shared"
-                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-RC")
+                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-RC2")
                 xcf.add(this)
             }
         }
@@ -19,7 +19,7 @@ kotlin {
         binaries {
             framework {
                 baseName = "shared"
-                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-RC")
+                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-RC2")
                 xcf.add(this)
             }
         }
