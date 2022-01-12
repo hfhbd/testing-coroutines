@@ -23,4 +23,40 @@ class iosSPMTests: XCTestCase {
         let value = (try? await t.value) ?? []
         XCTAssertEqual([], value)
     }
+    
+    class AsyncSuspendFunction<T>: KotlinSuspendFunction1 {
+        let function: (T) async -> Void
+        
+        init(_ function: @escaping (T) async -> Void) {
+            self.function = function
+        }
+        
+        @MainActor
+        func invoke(p1: Any?) async throws -> Any? {
+            await function(p1 as! T)
+        }
+    }
+    
+    @MainActor
+    func testBackpressure() async throws {
+        var current = 1
+        let gen: (FlowCollector) async -> Void = { collector in
+            try! await Builders_commonKt.withContext(context: Dispatchers.shared.Main, block: AsyncSuspendFunction<FlowCollector> { _ in
+                try! await collector.emit(value: current)
+            })
+            current += 1
+        }
+        let stream = ContextKt.flowOn(BuildersKt.flow(block: AsyncSuspendFunction {
+            await gen($0)
+        }), context: Dispatchers.shared.Main).stream(Int.self)
+        var got = [Int()]
+        for try await value in stream {
+            got.append(value)
+            if (value == 2) {
+                break
+            }
+        }
+        XCTAssertEqual([1, 2], got)
+        XCTAssertEqual(2, current)
+    }
 }
