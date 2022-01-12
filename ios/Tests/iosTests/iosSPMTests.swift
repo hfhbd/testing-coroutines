@@ -1,13 +1,13 @@
 import XCTest
-@testable import iosApp
+@testable import ios
 import shared
 import Combine
 
-class iosAppTests: XCTestCase {
+class iosSPMTests: XCTestCase {
     @MainActor
-    func testFlowToAsyncStream() async {
+    func testFlowToAsyncStream() async throws {
         let expectation = [1, 2, 3]
-        let results = await FlowsKt.flowFrom(expectation).stream(Int.self).collect()
+        let results = try await FlowsKt.flowFrom(expectation).stream(Int.self).collect()
         XCTAssertEqual(expectation, results)
     }
     
@@ -17,7 +17,7 @@ class iosAppTests: XCTestCase {
         let stream = FlowsKt.flowFrom(expectation).stream(Int.self)
         let t = Task { () -> [Int] in
             try await Task.sleep(nanoseconds: 3_000_000)
-            return await stream.collect()
+            return try await stream.collect()
         }
         t.cancel()
         let value = (try? await t.value) ?? []
