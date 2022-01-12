@@ -54,23 +54,24 @@ struct FlowStream<T>: AsyncSequence {
     func makeAsyncIterator() -> FlowAsyncIterator {
         FlowAsyncIterator(flow: flow)
     }
-    
+
     typealias AsyncIterator = FlowAsyncIterator
-    
+
     typealias Element = T
 
     let flow: Flow
     init (_ type: T.Type, flow: Flow) {
         self.flow = flow
     }
-    
+
     struct FlowAsyncIterator: AsyncIteratorProtocol {
         private let iterator: IteratorAsync
-        
+
         init(flow: Flow) {
             self.iterator = FlowsKt.asAsyncIterable(flow)
         }
-        
+
+        @MainActor
         func next() async throws -> T? {
             if(Task.isCancelled) {
                 iterator.cancel()
@@ -78,7 +79,7 @@ struct FlowStream<T>: AsyncSequence {
             }
             return try await iterator.next() as! T?
         }
-        
+
         typealias Element = T
     }
 }
@@ -87,7 +88,7 @@ extension Flow {
     func publisher<T>(_ t: T.Type) -> FlowPublisher<T> {
         FlowPublisher(flow: self)
     }
-    
+
     func stream<T>(_ t: T.Type) -> FlowStream<T> {
         FlowStream(t, flow: self)
     }

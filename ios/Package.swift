@@ -16,7 +16,9 @@ let package = Package(
     targets: [
         .target(
             name: "ios",
-            dependencies: ["shared"]),
+            dependencies: [
+              .product(name: "shared", package: "shared"),
+            ]),
         .testTarget(
             name: "iosTests",
             dependencies: ["ios"]),
