@@ -39,15 +39,6 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
             }
         }
-
-        val iosArm64Main by getting {
-            dependencies {
-            }
-        }
-
-        val iosSimulatorArm64Main by getting {
-            dependsOn(iosArm64Main)
-        }
     }
 }
 
