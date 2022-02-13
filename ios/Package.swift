@@ -11,7 +11,7 @@ let package = Package(
             targets: ["ios"]),
     ],
     dependencies: [
-        .package(name: "shared", path: "../clients/build/XCFrameworks/debug")
+        .package(name: "shared", path: "../build/XCFrameworks/debug")
     ],
     targets: [
         .target(
