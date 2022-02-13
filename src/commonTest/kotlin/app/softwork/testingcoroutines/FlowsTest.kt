@@ -76,8 +76,8 @@ class FlowsTest {
     @Test
     fun toAsyncTest() = runTest {
         val called = mutableListOf<Int>()
-        val expected = flowOf(1,2,3).onEach {
-                called += it
+        val expected = flowOf(1, 2, 3).onEach {
+            called += it
         }
         val iterator = expected.asAsyncIterable()
         val values = buildList {
@@ -104,7 +104,8 @@ class FlowsTest {
         assertEquals(
             listOf(1, 2),
             computed,
-            "upstream will always emit 1 time because other is a SharedFlow, so upstream will be called again before waiting for other"
+            "upstream will always emit 1 time because other is a SharedFlow, " +
+                    "so upstream will be called again before waiting for other"
         )
     }
 
@@ -117,5 +118,11 @@ class FlowsTest {
         val iterator = expected.asAsyncIterable()
         iterator.cancel()
         assertEquals(emptyList(), computed)
+    }
+
+    @Test
+    fun iterableToFlowTest() = runTest {
+        val iterable = listOf(1, 2, 3).async()
+        assertEquals(listOf(1, 2, 3), iterable.toFlow().toList())
     }
 }
