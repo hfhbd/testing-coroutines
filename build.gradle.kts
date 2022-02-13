@@ -72,7 +72,7 @@ tasks.register("generateSPM") {
                         targets: [
                             .binaryTarget(
                                 name: "shared",
-                                path: "clients.xcframework"
+                                path: "testing_coroutines.xcframework"
                             )
                         ]
                     )
