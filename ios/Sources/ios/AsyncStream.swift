@@ -2,54 +2,6 @@ import Combine
 import shared
 import SwiftUI
 
-struct FlowPublisher<T>: Publisher {
-    let flow: Flow
-
-    func receive<S>(subscriber: S) where S: Subscriber, Error == S.Failure, T == S.Input {
-        let subscription = FlowSubscription(flow: flow, subscriber: subscriber)
-        subscriber.receive(subscription: subscription)
-    }
-
-    typealias Output = T
-    typealias Failure = Error
-
-
-    private class FlowSubscription<S: Subscriber>: Subscription where S.Input == T, S.Failure == Error {
-        let flow: Flow
-        private var cancelling: Cancelable! = nil
-        private let subscriber: S
-
-        init(flow: Flow, subscriber: S) {
-            self.flow = flow
-            self.subscriber = subscriber
-        }
-
-        func request(_ demand: Subscribers.Demand) {
-            var demand = demand
-
-            while demand > 0 {
-                self.cancelling = FlowsKt.collectingBlocking(flow, action: { value in
-                    demand -= 1
-                    demand += self.subscriber.receive(value as! T)
-                }, onCompletion: { cause in
-                    if let cause = cause {
-                        self.subscriber.receive(completion: .failure(cause.asError()))
-                    } else {
-                        self.subscriber.receive(completion: .finished)
-                    }
-                    demand = Subscribers.Demand.none
-                })
-            }
-        }
-
-        func cancel() {
-            self.cancelling.cancel()
-        }
-
-        let combineIdentifier = CombineIdentifier()
-    }
-}
-
 struct FlowStream<T>: AsyncSequence {
     func makeAsyncIterator() -> FlowAsyncIterator {
         FlowAsyncIterator(flow: flow)
@@ -77,7 +29,7 @@ struct FlowStream<T>: AsyncSequence {
                 iterator.cancel()
                 return nil
             }
-            return try await iterator.next() as! T?
+            return try await iterator.next() as? T? ?? nil
         }
 
         typealias Element = T
@@ -85,10 +37,6 @@ struct FlowStream<T>: AsyncSequence {
 }
 
 extension Flow {
-    func publisher<T>(_ t: T.Type) -> FlowPublisher<T> {
-        FlowPublisher(flow: self)
-    }
-
     func stream<T>(_ t: T.Type) -> FlowStream<T> {
         FlowStream(t, flow: self)
     }
@@ -99,5 +47,44 @@ extension AsyncSequence {
         return try await reduce(into: [Element]()) {
             $0.append($1)
         }
+    }
+}
+
+class AsyncSuspendFunction0<R>: KotlinSuspendFunction0 {
+    let function: () async throws -> R
+
+    init(_ function: @escaping () async throws -> R) {
+        self.function = function
+    }
+
+    @MainActor
+    func invoke() async throws -> Any? {
+        try await function()
+    }
+}
+
+class AsyncSuspendFunction1<T, R>: KotlinSuspendFunction1 {
+    let function: (T) async throws -> R
+
+    init(_ function: @escaping (T) async throws -> R) {
+        self.function = function
+    }
+
+    @MainActor
+    func invoke(p1: Any?) async throws -> Any? {
+        try await function(p1 as! T)
+    }
+}
+
+class AsyncSuspendFunction2<T1, T2, R>: KotlinSuspendFunction2 {
+    let function: (T1, T2) async throws -> R
+
+    init(_ function: @escaping (T1, T2) async -> R) {
+        self.function = function
+    }
+
+    @MainActor
+    func invoke(p1: Any?, p2: Any?) async throws -> Any? {
+        try await function(p1 as! T1, p2 as! T2)
     }
 }

@@ -5,12 +5,39 @@ import Combine
 
 class iosSPMTests: XCTestCase {
     @MainActor
+    func testKotlinSuspendFunction1() async throws {
+        let action: KotlinSuspendFunction0 = AsyncSuspendFunction0<Void> {
+            
+        }
+        try await FlowsKt.runOnMain(action: action)
+        /*
+         suspend fun<T> runOnMain(action: suspend CoroutineScope.() -> T): T = withContext(Dispatchers.Main) {
+         action()
+         }
+         */
+    }
+
+    @MainActor
+    func testWithContext() async throws {
+        let action: KotlinSuspendFunction1 = AsyncSuspendFunction1<CoroutineScope, Void> { _ in
+            
+        }
+        try await Builders_commonKt.withContext(context: Dispatchers.shared.Main, block: action)
+        /*
+         equivalent to:
+         withContext(Dispatchers.Main) {
+             action()
+         }
+         */
+    }
+
+    @MainActor
     func testFlowToAsyncStream() async throws {
         let expectation = [1, 2, 3]
         let results = try await FlowsKt.flowFrom(expectation).stream(Int.self).collect()
         XCTAssertEqual(expectation, results)
     }
-    
+
     @MainActor
     func testCancelling() async {
         let expectation = [1, 2, 3]
@@ -23,33 +50,20 @@ class iosSPMTests: XCTestCase {
         let value = (try? await t.value) ?? []
         XCTAssertEqual([], value)
     }
-    
-    class AsyncSuspendFunction<T>: KotlinSuspendFunction1 {
-        let function: (T) async -> Void
-        
-        init(_ function: @escaping (T) async -> Void) {
-            self.function = function
-        }
-        
-        @MainActor
-        func invoke(p1: Any?) async throws -> Any? {
-            await function(p1 as! T)
-        }
-    }
-    
+
     @MainActor
     func testBackpressure() async throws {
         var current = 1
-        let gen: (FlowCollector) async -> Void = { collector in
-            try! await Builders_commonKt.withContext(context: Dispatchers.shared.Main, block: AsyncSuspendFunction<FlowCollector> { _ in
+
+        let flow = BuildersKt.flow(block: AsyncSuspendFunction1 { (collector: FlowCollector) in
+                print("Emitting")
                 try! await collector.emit(value: current)
-            })
-            current += 1
-        }
-        let stream = ContextKt.flowOn(BuildersKt.flow(block: AsyncSuspendFunction {
-            await gen($0)
-        }), context: Dispatchers.shared.Main).stream(Int.self)
+                current += 1
+        })
+
+        let stream = flow.stream(Int.self)
         var got = [Int()]
+        print("Request is called before Emitting")
         for try await value in stream {
             got.append(value)
             if (value == 2) {
