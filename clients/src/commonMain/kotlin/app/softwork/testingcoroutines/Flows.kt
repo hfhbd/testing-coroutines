@@ -57,11 +57,30 @@ fun <T> Flow<T>.asAsyncIterable(): IteratorAsync<T> = object : IteratorAsync<T> 
                 val deferred = CompletableDeferred<T>(job)
                 requester.emit { deferred.complete(it) }
                 deferred.await()
-            } catch (canceled: CancellationException) {
+            } catch (_: CancellationException) {
                 null
             }
         } else {
             null
         }
     }
+}
+
+fun <T> IteratorAsync<T>.toFlow() = flow {
+    while (true) {
+        val next = next() ?: break
+        emit(next)
+    }
+}
+
+fun <T> List<T>.async(): IteratorAsync<T> = object : IteratorAsync<T> {
+    val iterator = iterator()
+
+    override fun cancel() {}
+
+    override suspend fun next() = if (iterator.hasNext()) iterator.next() else null
+}
+
+suspend fun <T> runOnMain(action: suspend () -> T): T = withContext(Dispatchers.Main) {
+    action()
 }
