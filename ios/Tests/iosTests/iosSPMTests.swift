@@ -18,7 +18,7 @@ class iosSPMTests: XCTestCase {
     }
 
     @MainActor
-    func testWithContext() async throws {
+    func withContext() async throws {
         let action: KotlinSuspendFunction1 = AsyncSuspendFunction1<CoroutineScope, Void> { _ in
             
         }
@@ -51,26 +51,73 @@ class iosSPMTests: XCTestCase {
         XCTAssertEqual([], value)
     }
 
-    @MainActor
-    func testBackpressure() async throws {
-        var current = 1
-
-        let flow = BuildersKt.flow(block: AsyncSuspendFunction1 { (collector: FlowCollector) in
-                print("Emitting")
-                try! await collector.emit(value: current)
-                current += 1
-        })
-
-        let stream = flow.stream(Int.self)
-        var got = [Int()]
-        print("Request is called before Emitting")
+    class CounterS: AsyncSequence, AsyncIteratorProtocol {
+        func next() async -> Int? {
+            current += 1
+            return current
+        }
+        
+        typealias Element = Int
+        func makeAsyncIterator() -> CounterS {
+            self
+        }
+        
+        private(set) var current = -1
+    }
+    
+    func testStream() async {
+        let counter = CounterS()
+        var got = [Int]()
+        for await value in counter {
+            got.append(value)
+            if (value == 2) {
+                break
+            }
+        }
+        XCTAssertEqual([0, 1, 2], got)
+        XCTAssertEqual(2, counter.current)
+    }
+    
+    func testBackpressureM() async throws {
+        let stream = [0, 1, 2].values
+        var got = [Int]()
         for try await value in stream {
             got.append(value)
             if (value == 2) {
                 break
             }
         }
-        XCTAssertEqual([1, 2], got)
-        XCTAssertEqual(2, current)
+        XCTAssertEqual([0, 1, 2], got)
+    }
+    
+    @MainActor
+    func testBackpressure() async throws {
+        let counter = Counter()
+
+        let stream = counter.flow.stream(Int32.self)
+        var got = [Int32]()
+        for try await value in stream {
+            got.append(value)
+            if (value == 2) {
+                break
+            }
+        }
+        XCTAssertEqual([0, 1, 2], got)
+        XCTAssertEqual(3, counter.current)
+    }
+    
+    @MainActor
+    func testBackpressureCounter() async throws {
+        let counter = Counter()
+        
+        let stream = counter.flow.stream(Int32.self)
+        let iterator = stream.makeAsyncIterator()
+        let a = try await iterator.next()
+        XCTAssertEqual(0, a)
+        let b = try await iterator.next()
+        XCTAssertEqual(1, b)
+        let c = try await iterator.next()
+        XCTAssertEqual(2, c)
+        XCTAssertEqual(3, counter.current)
     }
 }
