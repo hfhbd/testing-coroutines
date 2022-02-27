@@ -31,7 +31,14 @@ class iosSPMTests: XCTestCase {
     @MainActor
     func testFlowToAsyncStream() async throws {
         let expectation = [1, 2, 3]
-        let results = try await FlowsKt.flowFrom(expectation).stream(Int.self).collect()
+        let results = await FlowsKt.flowFrom(expectation).stream(Int.self).collect()
+        XCTAssertEqual(expectation, results)
+    }
+    
+    @MainActor
+    func testFlowToAsyncStreamThrowing() async throws {
+        let expectation = [1, 2, 3]
+        let results = try await FlowsKt.flowFrom(expectation).streamThrowing(Int.self).collect()
         XCTAssertEqual(expectation, results)
     }
 
@@ -41,7 +48,7 @@ class iosSPMTests: XCTestCase {
         let stream = FlowsKt.flowFrom(expectation).stream(Int.self)
         let t = Task { () -> [Int] in
             try await Task.sleep(nanoseconds: 3_000_000)
-            return try await stream.collect()
+            return await stream.collect()
         }
         t.cancel()
         let value = (try? await t.value) ?? []
@@ -109,11 +116,11 @@ class iosSPMTests: XCTestCase {
 
         let stream = counter.flow.stream(Int32.self)
         var iterator = stream.makeAsyncIterator()
-        let a = try await iterator.next()
+        let a = await iterator.next()
         XCTAssertEqual(0, a)
-        let b = try await iterator.next()
+        let b = await iterator.next()
         XCTAssertEqual(1, b)
-        let c = try await iterator.next()
+        let c = await iterator.next()
         XCTAssertEqual(2, c)
         XCTAssertEqual(3, counter.current)
     }
