@@ -1,5 +1,4 @@
 import shared
-import SwiftUI
 
 struct FlowThrowingStream<T>: AsyncSequence {
     func makeAsyncIterator() -> FlowAsyncThrowingIterator {
