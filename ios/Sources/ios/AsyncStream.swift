@@ -4,7 +4,7 @@ import SwiftUI
 
 struct FlowStream<T>: AsyncSequence {
     func makeAsyncIterator() -> FlowAsyncIterator {
-        FlowAsyncIterator(iterator: FlowsKt.asAsyncIterable(flow))
+        FlowAsyncIterator(flow: flow)
     }
     
     typealias AsyncIterator = FlowAsyncIterator
@@ -17,14 +17,17 @@ struct FlowStream<T>: AsyncSequence {
     }
     
     struct FlowAsyncIterator: AsyncIteratorProtocol {
-        private let iterator: IteratorAsync
+        private let flow: Flow
+        private lazy var iterator: IteratorAsync = {
+            FlowsKt.asAsyncIterable(flow)
+        }()
         
-        init(iterator: IteratorAsync) {
-            self.iterator = iterator
+        init(flow: Flow) {
+            self.flow = flow
         }
         
         @MainActor
-        func next() async throws -> T? {
+        mutating func next() async throws -> T? {
             if(Task.isCancelled) {
                 iterator.cancel()
                 return nil
