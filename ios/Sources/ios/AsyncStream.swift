@@ -1,4 +1,3 @@
-import Combine
 import shared
 import SwiftUI
 
@@ -6,26 +5,26 @@ struct FlowStream<T>: AsyncSequence {
     func makeAsyncIterator() -> FlowAsyncIterator {
         FlowAsyncIterator(flow: flow)
     }
-    
+
     typealias AsyncIterator = FlowAsyncIterator
-    
+
     typealias Element = T
-    
+
     let flow: Flow
     init (_ type: T.Type, flow: Flow) {
         self.flow = flow
     }
-    
+
     struct FlowAsyncIterator: AsyncIteratorProtocol {
         private let flow: Flow
         private lazy var iterator: IteratorAsync = {
             FlowsKt.asAsyncIterable(flow)
         }()
-        
+
         init(flow: Flow) {
             self.flow = flow
         }
-        
+
         @MainActor
         mutating func next() async throws -> T? {
             if(Task.isCancelled) {
@@ -34,7 +33,7 @@ struct FlowStream<T>: AsyncSequence {
             }
             return try await iterator.next() as? T? ?? nil
         }
-        
+
         typealias Element = T
     }
 }
@@ -48,20 +47,20 @@ extension Flow {
 extension Array {
     class Sequence: AsyncSequence, AsyncIteratorProtocol {
         typealias AsyncIterator = Sequence
-        
+
         typealias Element = Array.Element
-        
+
         private var index = -1
         private let array: Array<Element>
-        
+
         init(_ array: Array<Element>) {
             self.array = array
         }
-        
+
         func makeAsyncIterator() -> Sequence {
             self
         }
-        
+
         func next() async throws -> Element? {
             guard index + 1 < array.count else {
                 return nil
@@ -70,7 +69,7 @@ extension Array {
             return array[index]
         }
     }
-    
+
     var values: Sequence {
         Sequence(self)
     }
@@ -86,11 +85,11 @@ extension AsyncSequence {
 
 class AsyncSuspendFunction0<R>: KotlinSuspendFunction0 {
     let function: () async throws -> R
-    
+
     init(_ function: @escaping () async throws -> R) {
         self.function = function
     }
-    
+
     @MainActor
     func invoke() async throws -> Any? {
         try await function()
@@ -99,11 +98,11 @@ class AsyncSuspendFunction0<R>: KotlinSuspendFunction0 {
 
 class AsyncSuspendFunction1<T, R>: KotlinSuspendFunction1 {
     let function: (T) async throws -> R
-    
+
     init(_ function: @escaping (T) async throws -> R) {
         self.function = function
     }
-    
+
     @MainActor
     func invoke(p1: Any?) async throws -> Any? {
         try await function(p1 as! T)
@@ -112,11 +111,11 @@ class AsyncSuspendFunction1<T, R>: KotlinSuspendFunction1 {
 
 class AsyncSuspendFunction2<T1, T2, R>: KotlinSuspendFunction2 {
     let function: (T1, T2) async throws -> R
-    
+
     init(_ function: @escaping (T1, T2) async -> R) {
         self.function = function
     }
-    
+
     @MainActor
     func invoke(p1: Any?, p2: Any?) async throws -> Any? {
         try await function(p1 as! T1, p2 as! T2)
