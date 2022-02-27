@@ -55,7 +55,6 @@ class FlowsTest {
                         called += it + 1
                     }
                 }.collecting({
-                    println("COLLECT $it")
                     results.add(it)
                     if (results.size == 2) {
                         job.cancel()

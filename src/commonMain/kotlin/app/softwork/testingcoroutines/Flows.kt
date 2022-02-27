@@ -2,6 +2,7 @@ package app.softwork.testingcoroutines
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlin.coroutines.*
 
 fun interface Cancelable {
     fun cancel()
@@ -33,7 +34,9 @@ public interface IteratorAsync<out T> : Cancelable {
     public suspend fun next(): T?
 }
 
-fun <T> Flow<T>.asAsyncIterable(): IteratorAsync<T> = object : IteratorAsync<T> {
+val EmptyContext = EmptyCoroutineContext
+
+fun <T> Flow<T>.asAsyncIterable(context: CoroutineContext = EmptyContext): IteratorAsync<T> = object : IteratorAsync<T> {
     private var job: Job? = null
     private val fixForInitDelay = 1
     private val requester = MutableSharedFlow<(T) -> Unit>(replay = fixForInitDelay)
@@ -42,15 +45,15 @@ fun <T> Flow<T>.asAsyncIterable(): IteratorAsync<T> = object : IteratorAsync<T> 
         job?.cancel()
     }
 
+    private fun c() = cancel()
+
     override suspend fun next(): T? {
         if (job == null) {
-            val job = Job()
-            onCompletion {
-                job.cancel()
+            this.job = onCompletion {
+                c()
             }.zip(requester) { t, requester ->
                 requester(t)
-            }.launchIn(CoroutineScope(job))
-            this.job = job
+            }.launchIn(CoroutineScope(context))
         }
         return if (job!!.isActive) {
             try {
