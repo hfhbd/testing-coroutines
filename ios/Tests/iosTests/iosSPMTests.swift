@@ -1,14 +1,11 @@
 import XCTest
 @testable import ios
 import shared
-import Combine
 
 class iosSPMTests: XCTestCase {
     @MainActor
     func testKotlinSuspendFunction1() async throws {
-        let action: KotlinSuspendFunction0 = AsyncSuspendFunction0<Void> {
-            
-        }
+        let action: KotlinSuspendFunction0 = AsyncSuspendFunction0<Void> { }
         try await FlowsKt.runOnMain(action: action)
         /*
          suspend fun<T> runOnMain(action: suspend CoroutineScope.() -> T): T = withContext(Dispatchers.Main) {
@@ -20,7 +17,7 @@ class iosSPMTests: XCTestCase {
     @MainActor
     func withContext() async throws {
         let action: KotlinSuspendFunction1 = AsyncSuspendFunction1<CoroutineScope, Void> { _ in
-            
+
         }
         try await Builders_commonKt.withContext(context: Dispatchers.shared.Main, block: action)
         /*
@@ -56,15 +53,15 @@ class iosSPMTests: XCTestCase {
             current += 1
             return current
         }
-        
+
         typealias Element = Int
         func makeAsyncIterator() -> CounterS {
             self
         }
-        
+
         private(set) var current = -1
     }
-    
+
     func testStream() async {
         let counter = CounterS()
         var got = [Int]()
@@ -77,7 +74,7 @@ class iosSPMTests: XCTestCase {
         XCTAssertEqual([0, 1, 2], got)
         XCTAssertEqual(2, counter.current)
     }
-    
+
     func testBackpressureM() async throws {
         let stream = [0, 1, 2].values
         var got = [Int]()
@@ -89,7 +86,7 @@ class iosSPMTests: XCTestCase {
         }
         XCTAssertEqual([0, 1, 2], got)
     }
-    
+
     @MainActor
     func testBackpressure() async throws {
         let counter = Counter()
@@ -105,11 +102,11 @@ class iosSPMTests: XCTestCase {
         XCTAssertEqual([0, 1, 2], got)
         XCTAssertEqual(3, counter.current)
     }
-    
+
     @MainActor
     func testBackpressureCounter() async throws {
         let counter = Counter()
-        
+
         let stream = counter.flow.stream(Int32.self)
         var iterator = stream.makeAsyncIterator()
         let a = try await iterator.next()
