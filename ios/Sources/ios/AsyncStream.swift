@@ -2,31 +2,31 @@ import shared
 import SwiftUI
 
 struct FlowThrowingStream<T>: AsyncSequence {
-    func makeAsyncIterator() -> FlowAsyncIterator {
-        FlowAsyncIterator(flow: flow)
+    func makeAsyncIterator() -> FlowAsyncThrowingIterator {
+        FlowAsyncThrowingIterator(FlowsKt.asAsyncIterable(flow, context: context))
     }
 
-    typealias AsyncIterator = FlowAsyncIterator
+    typealias AsyncIterator = FlowAsyncThrowingIterator
 
     typealias Element = T
 
-    let flow: Flow
-    init (_ type: T.Type, flow: Flow) {
+    private let flow: Flow
+    private let context: KotlinCoroutineContext
+    
+    init (_ type: T.Type, flow: Flow, context: KotlinCoroutineContext) {
         self.flow = flow
+        self.context = context
     }
 
-    struct FlowAsyncIterator: AsyncIteratorProtocol {
-        private let flow: Flow
-        private lazy var iterator: IteratorAsync = {
-            FlowsKt.asAsyncIterable(flow)
-        }()
+    struct FlowAsyncThrowingIterator: AsyncIteratorProtocol {
+        private let iterator: IteratorAsync
 
-        init(flow: Flow) {
-            self.flow = flow
+        init(_ iterator: IteratorAsync) {
+            self.iterator = iterator
         }
 
         @MainActor
-        mutating func next() async throws -> T? {
+        func next() async throws -> T? {
             if(Task.isCancelled) {
                 iterator.cancel()
                 return nil
@@ -40,47 +40,47 @@ struct FlowThrowingStream<T>: AsyncSequence {
 
 struct FlowStream<T>: AsyncSequence {
     func makeAsyncIterator() -> FlowAsyncIterator {
-        FlowAsyncIterator(flow: flow)
+        FlowAsyncIterator(FlowsKt.asAsyncIterable(flow, context: context))
     }
-    
+
     typealias AsyncIterator = FlowAsyncIterator
-    
+
     typealias Element = T
+
+    private let flow: Flow
+    private let context: KotlinCoroutineContext
     
-    let flow: Flow
-    init (_ type: T.Type, flow: Flow) {
+    init (_ type: T.Type, flow: Flow, context: KotlinCoroutineContext) {
         self.flow = flow
+        self.context = context
     }
-    
+
     struct FlowAsyncIterator: AsyncIteratorProtocol {
-        private let flow: Flow
-        private lazy var iterator: IteratorAsync = {
-            FlowsKt.asAsyncIterable(flow)
-        }()
+        private let iterator: IteratorAsync
         
-        init(flow: Flow) {
-            self.flow = flow
+        init(_ iterator: IteratorAsync) {
+            self.iterator = iterator
         }
-        
+
         @MainActor
-        mutating func next() async -> T? {
+        func next() async -> T? {
             if(Task.isCancelled) {
                 iterator.cancel()
                 return nil
             }
             return try! await iterator.next() as? T? ?? nil
         }
-        
+
         typealias Element = T
     }
 }
 
 extension Flow {
-    func streamThrowing<T>(_ t: T.Type) -> FlowThrowingStream<T> {
-        FlowThrowingStream(t, flow: self)
+    func streamThrowing<T>(_ t: T.Type, context: KotlinCoroutineContext = KotlinEmptyCoroutineContext.shared) -> FlowThrowingStream<T> {
+        FlowThrowingStream(t, flow: self, context: context)
     }
-    func stream<T>(_ t: T.Type) -> FlowStream<T> {
-        FlowStream(t, flow: self)
+    func stream<T>(_ t: T.Type, context: KotlinCoroutineContext = KotlinEmptyCoroutineContext.shared) -> FlowStream<T> {
+        FlowStream(t, flow: self, context: context)
     }
 }
 

@@ -115,7 +115,7 @@ class iosSPMTests: XCTestCase {
         let counter = Counter()
 
         let stream = counter.flow.stream(Int32.self)
-        var iterator = stream.makeAsyncIterator()
+        let iterator = stream.makeAsyncIterator()
         let a = await iterator.next()
         XCTAssertEqual(0, a)
         let b = await iterator.next()
