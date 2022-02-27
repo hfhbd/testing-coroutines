@@ -1,7 +1,7 @@
 import shared
 import SwiftUI
 
-struct FlowStream<T>: AsyncSequence {
+struct FlowThrowingStream<T>: AsyncSequence {
     func makeAsyncIterator() -> FlowAsyncIterator {
         FlowAsyncIterator(flow: flow)
     }
@@ -38,7 +38,47 @@ struct FlowStream<T>: AsyncSequence {
     }
 }
 
+struct FlowStream<T>: AsyncSequence {
+    func makeAsyncIterator() -> FlowAsyncIterator {
+        FlowAsyncIterator(flow: flow)
+    }
+    
+    typealias AsyncIterator = FlowAsyncIterator
+    
+    typealias Element = T
+    
+    let flow: Flow
+    init (_ type: T.Type, flow: Flow) {
+        self.flow = flow
+    }
+    
+    struct FlowAsyncIterator: AsyncIteratorProtocol {
+        private let flow: Flow
+        private lazy var iterator: IteratorAsync = {
+            FlowsKt.asAsyncIterable(flow)
+        }()
+        
+        init(flow: Flow) {
+            self.flow = flow
+        }
+        
+        @MainActor
+        mutating func next() async -> T? {
+            if(Task.isCancelled) {
+                iterator.cancel()
+                return nil
+            }
+            return try! await iterator.next() as? T? ?? nil
+        }
+        
+        typealias Element = T
+    }
+}
+
 extension Flow {
+    func streamThrowing<T>(_ t: T.Type) -> FlowThrowingStream<T> {
+        FlowThrowingStream(t, flow: self)
+    }
     func stream<T>(_ t: T.Type) -> FlowStream<T> {
         FlowStream(t, flow: self)
     }
@@ -61,7 +101,7 @@ extension Array {
             self
         }
 
-        func next() async throws -> Element? {
+        func next() async -> Element? {
             guard index + 1 < array.count else {
                 return nil
             }
