@@ -29,7 +29,7 @@ class iosSPMTests: XCTestCase {
     }
 
     @MainActor
-    func testFlowToAsyncStream() async throws {
+    func testFlowToAsyncStream() async {
         let expectation = [1, 2, 3]
         let results = await FlowsKt.flowFrom(expectation).stream(Int.self).collect()
         XCTAssertEqual(expectation, results)
@@ -82,10 +82,10 @@ class iosSPMTests: XCTestCase {
         XCTAssertEqual(2, counter.current)
     }
 
-    func testBackpressureM() async throws {
+    func testBackpressureM() async {
         let stream = [0, 1, 2].values
         var got = [Int]()
-        for try await value in stream {
+        for await value in stream {
             got.append(value)
             if (value == 2) {
                 break
@@ -95,12 +95,12 @@ class iosSPMTests: XCTestCase {
     }
 
     @MainActor
-    func testBackpressure() async throws {
+    func testBackpressure() async {
         let counter = Counter()
 
         let stream = counter.flow.stream(Int32.self)
         var got = [Int32]()
-        for try await value in stream {
+        for await value in stream {
             got.append(value)
             if (value == 2) {
                 break
@@ -111,7 +111,7 @@ class iosSPMTests: XCTestCase {
     }
 
     @MainActor
-    func testBackpressureCounter() async throws {
+    func testBackpressureCounter() async {
         let counter = Counter()
 
         let stream = counter.flow.stream(Int32.self)
@@ -123,5 +123,54 @@ class iosSPMTests: XCTestCase {
         let c = await iterator.next()
         XCTAssertEqual(2, c)
         XCTAssertEqual(3, counter.current)
+    }
+    
+    func testMutableStateFlow() async {
+        let flow = StateFlowKt.MutableStateFlow(value: -1)
+        let collector = Task<[Int], Never> {
+            var results = [Int]()
+            for await value in flow.stream(Int.self) {
+                results.append(value)
+                if (value == 2) {
+                    break
+                }
+            }
+            return results
+        }
+        for i in 0...3 {
+            try! await Task.sleep(nanoseconds: 1_000_000)
+            flow.setValue(i)
+        }
+        let results = await collector.value
+        XCTAssertEqual([-1, 0, 1, 2], results)
+    }
+    
+    func testMutableStateFlowCombine() async {
+        let flow1 = StateFlowKt.MutableStateFlow(value: -1)
+        let flow2 = StateFlowKt.MutableStateFlow(value: -1)
+        let transform = AsyncSuspendFunction2<Int, Int, String> { a, b in
+            "\(a) \(b)"
+        }
+        let combine = ZipKt.combine(flow: flow1, flow2: flow2, transform: transform)
+        let collector = Task<[String], Never> {
+            var results = [String]()
+            for await value in combine.stream(String.self) {
+                results.append(value)
+                if (results.count == 4) {
+                    break
+                }
+            }
+            return results
+        }
+        for i in 0...3 {
+            try! await Task.sleep(nanoseconds: 1_000_000)
+            flow1.setValue(i)
+        }
+        for i in 0...3 {
+            try! await Task.sleep(nanoseconds: 1_000_000)
+            flow2.setValue(i)
+        }
+        let results = await collector.value
+        XCTAssertEqual(["-1 -1", "0 -1", "1 -1", "2 -1"], results)
     }
 }
