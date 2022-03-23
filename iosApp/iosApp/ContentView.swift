@@ -6,16 +6,36 @@
 //
 
 import SwiftUI
+import shared
 
 struct ContentView: View {
+    let viewModel: Counter
+
+    @State var counter = 0
     var body: some View {
-        Text("Hello, world!")
+        TabView {
+        Button("\(counter)") {
+            viewModel.state.setValue(counter + 1)
+        }
             .padding()
+            .task {
+                for await i in viewModel.stateFlow.stream(Int.self) {
+                    self.counter = i
+                }
+            }.tabItem {
+                Text("Counter")
+            }
+
+            Text("A").tabItem {
+                Text("A")
+            }
+        }
+
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct Previews_ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(viewModel: Counter())
     }
 }

@@ -11,7 +11,24 @@
 		08D1EF9E27E0C51A00A51C9E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08D1EF9D27E0C51A00A51C9E /* ContentView.swift */; };
 		08D1EFA027E0C51B00A51C9E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 08D1EF9F27E0C51B00A51C9E /* Assets.xcassets */; };
 		08D1EFA327E0C51B00A51C9E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 08D1EFA227E0C51B00A51C9E /* Preview Assets.xcassets */; };
+		08D1EFB327E0D27C00A51C9E /* testing_coroutines.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08D1EFB227E0D27C00A51C9E /* testing_coroutines.xcframework */; };
+		08D1EFB427E0D27C00A51C9E /* testing_coroutines.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 08D1EFB227E0D27C00A51C9E /* testing_coroutines.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		08D1EFBA27E0D52500A51C9E /* A.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08D1EFB927E0D52500A51C9E /* A.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		08D1EFB527E0D27C00A51C9E /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				08D1EFB427E0D27C00A51C9E /* testing_coroutines.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		08D1EF9827E0C51A00A51C9E /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -19,6 +36,8 @@
 		08D1EF9D27E0C51A00A51C9E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		08D1EF9F27E0C51B00A51C9E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		08D1EFA227E0C51B00A51C9E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		08D1EFB227E0D27C00A51C9E /* testing_coroutines.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = testing_coroutines.xcframework; path = ../build/XCFrameworks/debug/testing_coroutines.xcframework; sourceTree = "<group>"; };
+		08D1EFB927E0D52500A51C9E /* A.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = A.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -26,6 +45,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				08D1EFB327E0D27C00A51C9E /* testing_coroutines.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -35,8 +55,10 @@
 		08D1EF8F27E0C51A00A51C9E = {
 			isa = PBXGroup;
 			children = (
+				08D1EFA927E0C54700A51C9E /* Packages */,
 				08D1EF9A27E0C51A00A51C9E /* iosApp */,
 				08D1EF9927E0C51A00A51C9E /* Products */,
+				08D1EFB127E0D27C00A51C9E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -55,6 +77,7 @@
 				08D1EF9D27E0C51A00A51C9E /* ContentView.swift */,
 				08D1EF9F27E0C51B00A51C9E /* Assets.xcassets */,
 				08D1EFA127E0C51B00A51C9E /* Preview Content */,
+				08D1EFB927E0D52500A51C9E /* A.swift */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -67,6 +90,21 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		08D1EFA927E0C54700A51C9E /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		08D1EFB127E0D27C00A51C9E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				08D1EFB227E0D27C00A51C9E /* testing_coroutines.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -77,6 +115,7 @@
 				08D1EF9427E0C51A00A51C9E /* Sources */,
 				08D1EF9527E0C51A00A51C9E /* Frameworks */,
 				08D1EF9627E0C51A00A51C9E /* Resources */,
+				08D1EFB527E0D27C00A51C9E /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -137,6 +176,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				08D1EFBA27E0D52500A51C9E /* A.swift in Sources */,
 				08D1EF9E27E0C51A00A51C9E /* ContentView.swift in Sources */,
 				08D1EF9C27E0C51A00A51C9E /* iosAppApp.swift in Sources */,
 			);

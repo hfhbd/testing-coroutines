@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import shared
 
 @main
 struct iosAppApp: App {
+    let viewModel = Counter()
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(viewModel: viewModel)
         }
     }
 }

@@ -48,22 +48,33 @@ fun <T> Flow<T>.asAsyncIterable(context: CoroutineContext = EmptyContext): Itera
     private fun c() = cancel()
 
     override suspend fun next(): T? {
+        println("CALLED NEXT job: $job requestors: ${requester.subscriptionCount.value}")
         if (job == null) {
+            println("INIT job: $job requestors: ${requester.subscriptionCount.value}")
             this.job = onCompletion {
                 c()
+            }.onEach {
+                println("ON EACH GOT $it")
             }.zip(requester) { t, requester ->
+                println("ZIP GOT $t $requester")
                 requester(t)
             }.launchIn(CoroutineScope(context))
+            println("INIT DONE job: $job requestors: ${requester.subscriptionCount.value}")
         }
         return if (job!!.isActive) {
-            try {
-                val deferred = CompletableDeferred<T>(job)
-                requester.emit { deferred.complete(it) }
-                deferred.await()
-            } catch (_: CancellationException) {
-                null
+            println("JOB ACTIVE: REQUESTING requestors: ${requester.subscriptionCount.value}\"")
+            val deferred = CompletableDeferred<T>(job)
+            println("SEND NEW VALUE")
+            requester.emit {
+                println("GOT NEW VALUE $it")
+                deferred.complete(it)
             }
+            println("WAITING FOR NEW VALUE $deferred")
+            val t = deferred.await()
+            println("RETURN NEW VALUE $t")
+            t
         } else {
+            println("INACTIVE RETURN null")
             null
         }
     }
