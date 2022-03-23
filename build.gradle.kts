@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.apple.*
 
 plugins {
     // Apache 2, https://github.com/JetBrains/kotlin/releases/latest
-    kotlin("multiplatform") version "1.6.20-RC"
+    kotlin("multiplatform") version "1.6.20-RC2"
 }
 
 repositories {
