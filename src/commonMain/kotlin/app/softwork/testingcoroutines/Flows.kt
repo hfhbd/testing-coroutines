@@ -33,46 +33,57 @@ fun <T> Flow<T>.collecting(action: suspend (T) -> Unit, onCompletion: (Throwable
 
 fun <T> List<T>.flowFrom() = asFlow()
 
-public interface IteratorAsync<out T> : Cancelable {
+interface IteratorAsync<out T> : Cancelable {
     /**
      * Returns the next element in the iteration.
      */
-    public suspend fun next(): T?
+    suspend fun next(): T?
 }
 
-val EmptyContext = EmptyCoroutineContext
+fun <T> Flow<T>.asAsyncIterable(context: CoroutineContext): IteratorAsync<T> = object : IteratorAsync<T> {
+    private var cont: Continuation<Unit>? = null
+    private var value: CompletableDeferred<T?> = CompletableDeferred()
 
-fun <T> Flow<T>.asAsyncIterable(context: CoroutineContext): IteratorAsync<T> =
-    object : IteratorAsync<T> {
-        private val scope = CoroutineScope(context)
-
-        private lateinit var value: CompletableDeferred<T>
-
-        private val collector: Job = scope.launch(start = CoroutineStart.LAZY) {
-            collect {
-                nextCall.join()
-                value.complete(it)
-                nextCall = newJob()
+    override fun cancel() {
+        value.cancel()
+        when (val cont = cont) {
+            is CancellableContinuation -> {
+                if (cont.isActive) {
+                    cont.resumeWithException(CancellationException("Canceled upon user request"))
+                }
             }
-            c()
-        }
-        private fun newJob() = Job(collector)
-        private fun c() = cancel()
-        private var nextCall: CompletableJob = Job(collector)
-
-        override fun cancel() {
-            collector.cancel()
-        }
-
-        override suspend fun next(): T? {
-            collector.start()
-            return if (collector.isActive) {
-                value = CompletableDeferred(collector)
-                nextCall.complete()
-                value.await()
-            } else null
+            else -> {
+                cont?.resumeWithException(CancellationException("Canceled upon user request"))
+            }
         }
     }
+
+    override suspend fun next(): T? {
+        val cancelCont = cont
+        return if (cancelCont != null && cancelCont is CancellableContinuation) {
+            if (cancelCont.isActive) {
+                cancelCont.resume(Unit)
+                value.await()
+            } else null
+        } else {
+            val collecting = suspend {
+                collect { t ->
+                    suspendCancellableCoroutine<Unit> {
+                        value.complete(t)
+                        value = CompletableDeferred()
+                        cont = it
+                    }
+                }
+                value.complete(null)
+            }
+            cont = collecting.createCoroutine(Continuation(context) {
+                it.getOrNull()
+            })
+            cont!!.resume(Unit)
+            value.await()
+        }
+    }
+}
 
 fun <T> IteratorAsync<T>.toFlow() = flow {
     while (true) {

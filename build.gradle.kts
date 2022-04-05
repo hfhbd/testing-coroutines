@@ -47,7 +47,11 @@ kotlin {
     }
 }
 
+val assembleXCFramework by tasks
+
 tasks.register("generateSPM") {
+    dependsOn(assembleXCFramework)
+
     doLast {
         (File(buildDir, "XCFrameworks").listFiles() ?: emptyArray()).forEach {
             val output = File(it, "Package.swift")

@@ -96,12 +96,7 @@ class FlowsTest {
         assertNotNull(next)
         iterator.cancel()
         assertEquals(1, next)
-        assertEquals(
-            listOf(1, 2),
-            computed,
-            "upstream will always emit 1 time because other is a SharedFlow, " +
-                    "so upstream will be called again before waiting for other"
-        )
+        assertEquals(listOf(1), computed)
     }
 
     @Test
