@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.apple.*
 
 plugins {
     // Apache 2, https://github.com/JetBrains/kotlin/releases/latest
-    kotlin("multiplatform") version "1.6.20-RC"
+    kotlin("multiplatform") version "1.6.20"
 }
 
 repositories {
@@ -17,7 +17,7 @@ kotlin {
         binaries {
             framework {
                 baseName = "shared"
-                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
                 xcf.add(this)
             }
         }
@@ -26,7 +26,7 @@ kotlin {
         binaries {
             framework {
                 baseName = "shared"
-                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
                 xcf.add(this)
             }
         }
@@ -35,13 +35,13 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
             }
         }
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1")
             }
         }
     }
