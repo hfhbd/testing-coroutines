@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.*
 import kotlin.time.Duration.Companion.seconds
 
 class Counter {
-    val state = MutableStateFlow("A")
-    val stateFlow: Flow<String> = state
+    val state = MutableStateFlow(0)
+    val stateFlow: Flow<Int> = state
 
     var current = 0
         private set

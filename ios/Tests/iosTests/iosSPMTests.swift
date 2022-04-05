@@ -31,21 +31,21 @@ class iosSPMTests: XCTestCase {
     @MainActor
     func testFlowToAsyncStream() async {
         let expectation = [1, 2, 3]
-        let results = await FlowsKt.flowFrom(expectation).stream(Int.self).collect()
+        let results = await FlowsKt.flowFrom(expectation).stream(Int.self, context: Dispatchers.shared.Main).collect()
         XCTAssertEqual(expectation, results)
     }
     
     @MainActor
     func testFlowToAsyncStreamThrowing() async throws {
         let expectation = [1, 2, 3]
-        let results = try await FlowsKt.flowFrom(expectation).streamThrowing(Int.self).collect()
+        let results = try await FlowsKt.flowFrom(expectation).streamThrowing(Int.self, context: Dispatchers.shared.Default).collect()
         XCTAssertEqual(expectation, results)
     }
 
     @MainActor
     func testCancelling() async {
         let expectation = [1, 2, 3]
-        let stream = FlowsKt.flowFrom(expectation).stream(Int.self)
+        let stream = FlowsKt.flowFrom(expectation).stream(Int.self, context: Dispatchers.shared.Default)
         let t = Task { () -> [Int] in
             try await Task.sleep(nanoseconds: 3_000_000)
             return await stream.collect()
@@ -98,7 +98,7 @@ class iosSPMTests: XCTestCase {
     func testBackpressure() async {
         let counter = Counter()
 
-        let stream = counter.flow.stream(Int32.self)
+        let stream = counter.flow.stream(Int32.self, context: Dispatchers.shared.Default)
         var got = [Int32]()
         for await value in stream {
             got.append(value)
@@ -107,14 +107,14 @@ class iosSPMTests: XCTestCase {
             }
         }
         XCTAssertEqual([0, 1, 2], got)
-        XCTAssertEqual(3, counter.current)
+        XCTAssertEqual(2, counter.current)
     }
 
     @MainActor
     func testBackpressureCounter() async {
         let counter = Counter()
 
-        let stream = counter.flow.stream(Int32.self)
+        let stream = counter.flow.stream(Int32.self, context: Dispatchers.shared.Default)
         let iterator = stream.makeAsyncIterator()
         let a = await iterator.next()
         XCTAssertEqual(0, a)
@@ -122,14 +122,35 @@ class iosSPMTests: XCTestCase {
         XCTAssertEqual(1, b)
         let c = await iterator.next()
         XCTAssertEqual(2, c)
-        XCTAssertEqual(3, counter.current)
+        XCTAssertEqual(2, counter.current)
+    }
+    
+    @MainActor
+    func testBackpressureCounterStateFlow() async {
+        let counter = Counter()
+        
+        let stream = counter.stateFlow.stream(Int.self, context: Dispatchers.shared.Default)
+        let collector = Task {
+        let iterator = stream.makeAsyncIterator()
+        let a = await iterator.next()
+        XCTAssertEqual(0, a)
+        let b = await iterator.next()
+        XCTAssertEqual(1, b)
+        let c = await iterator.next()
+        XCTAssertEqual(2, c)
+        }
+        try! await Task.sleep(nanoseconds: 1_000_000)
+        counter.state.setValue(1)
+        try! await Task.sleep(nanoseconds: 1_000_000)
+        counter.state.setValue(2)
+        await collector.value
     }
     
     func testMutableStateFlow() async {
         let flow = StateFlowKt.MutableStateFlow(value: -1)
         let collector = Task<[Int], Never> {
             var results = [Int]()
-            for await value in flow.stream(Int.self) {
+            for await value in flow.stream(Int.self, context: Dispatchers.shared.Default) {
                 results.append(value)
                 if (value == 2) {
                     break
@@ -154,7 +175,7 @@ class iosSPMTests: XCTestCase {
         let combine = ZipKt.combine(flow: flow1, flow2: flow2, transform: transform)
         let collector = Task<[String], Never> {
             var results = [String]()
-            for await value in combine.stream(String.self) {
+            for await value in combine.stream(String.self, context: Dispatchers.shared.Default) {
                 results.append(value)
                 if (results.count == 4) {
                     break

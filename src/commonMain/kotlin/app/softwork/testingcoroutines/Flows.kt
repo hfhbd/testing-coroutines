@@ -33,14 +33,12 @@ fun <T> Flow<T>.collecting(action: suspend (T) -> Unit, onCompletion: (Throwable
 
 fun <T> List<T>.flowFrom() = asFlow()
 
-public interface IteratorAsync<out T> : Cancelable {
+interface IteratorAsync<out T> : Cancelable {
     /**
      * Returns the next element in the iteration.
      */
-    public suspend fun next(): T?
+    suspend fun next(): T?
 }
-
-val EmptyContext = EmptyCoroutineContext
 
 fun <T> Flow<T>.asAsyncIterable(context: CoroutineContext): IteratorAsync<T> = object : IteratorAsync<T> {
     private var cont: Continuation<Unit>? = null

@@ -13,24 +13,15 @@ struct ContentView: View {
 
     @State var counter = 0
     var body: some View {
-        TabView {
         Button("\(counter)") {
             viewModel.state.setValue(counter + 1)
         }
             .padding()
             .task {
-                for await i in viewModel.stateFlow.stream(Int.self) {
+                for await i in viewModel.stateFlow.stream(Int.self, context: Dispatchers.shared.Default) {
                     self.counter = i
                 }
-            }.tabItem {
-                Text("Counter")
             }
-
-            Text("A").tabItem {
-                Text("A")
-            }
-        }
-
     }
 }
 
