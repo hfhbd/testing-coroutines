@@ -18,8 +18,7 @@ class CounterTest {
         val async = asyncCounter.flow.asAsyncIterable(coroutineContext)
         assertEquals(0, async.next())
         assertEquals(1, async.next())
-        val delay = 1
-        assertEquals(1 + delay, asyncCounter.current)
+        assertEquals(1, asyncCounter.current)
         async.cancel()
     }
 
