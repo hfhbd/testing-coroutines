@@ -6,6 +6,7 @@ import kotlinx.coroutines.test.*
 import kotlin.test.*
 import kotlin.time.Duration.Companion.seconds
 
+@ExperimentalCoroutinesApi
 class CounterTest {
     @Test
     fun loadTest() = runTest {
@@ -14,11 +15,10 @@ class CounterTest {
         assertEquals(1, normal.current)
 
         val asyncCounter = Counter()
-        val async = asyncCounter.flow.asAsyncIterable()
+        val async = asyncCounter.flow.asAsyncIterable(coroutineContext)
         assertEquals(0, async.next())
         assertEquals(1, async.next())
-        val calledButWaitsForNext = 1
-        assertEquals(1 + calledButWaitsForNext, asyncCounter.current)
+        assertEquals(1, asyncCounter.current)
     }
 
     @Test
@@ -77,7 +77,9 @@ class CounterTest {
         }
         repeat(10) {
             flow.value = it
+            println("SET VALUE $it")
             runCurrent()
+            println("AFTER RUNCURRENT $it")
             delay(1.seconds)
         }
         assertEquals(List(10) { it }, results.await())

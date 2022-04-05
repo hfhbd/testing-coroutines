@@ -14,11 +14,17 @@ fun <T> Flow<T>.collectingBlocking(action: (T) -> Unit, onCompletion: (Throwable
 fun <T> Flow<T>.collecting(action: suspend (T) -> Unit, onCompletion: (Throwable?) -> Unit): Cancelable {
     val job = Job()
 
-    onEach {
-        action(it)
-    }.onCompletion {
-        onCompletion(it)
-    }.launchIn(CoroutineScope(job))
+    CoroutineScope(job).launch {
+        try {
+            collect {
+                action(it)
+            }
+            onCompletion(null)
+        } catch (e: Throwable) {
+            onCompletion(e)
+            throw e
+        }
+    }
 
     return Cancelable {
         job.cancel()
@@ -36,49 +42,53 @@ public interface IteratorAsync<out T> : Cancelable {
 
 val EmptyContext = EmptyCoroutineContext
 
-fun <T> Flow<T>.asAsyncIterable(context: CoroutineContext = EmptyContext): IteratorAsync<T> = object : IteratorAsync<T> {
-    private var job: Job? = null
-    private val fixForInitDelay = 1
-    private val requester = MutableSharedFlow<(T) -> Unit>(replay = fixForInitDelay)
+fun <T> Flow<T>.asAsyncIterable(context: CoroutineContext): IteratorAsync<T> =
+    object : IteratorAsync<T> {
+        private var cont: CancellableContinuation<Unit>
 
-    override fun cancel() {
-        job?.cancel()
-    }
-
-    private fun c() = cancel()
-
-    override suspend fun next(): T? {
-        println("CALLED NEXT job: $job requestors: ${requester.subscriptionCount.value}")
-        if (job == null) {
-            println("INIT job: $job requestors: ${requester.subscriptionCount.value}")
-            this.job = onCompletion {
-                c()
-            }.onEach {
-                println("ON EACH GOT $it")
-            }.zip(requester) { t, requester ->
-                println("ZIP GOT $t $requester")
-                requester(t)
-            }.launchIn(CoroutineScope(context))
-            println("INIT DONE job: $job requestors: ${requester.subscriptionCount.value}")
-        }
-        return if (job!!.isActive) {
-            println("JOB ACTIVE: REQUESTING requestors: ${requester.subscriptionCount.value}\"")
-            val deferred = CompletableDeferred<T>(job)
-            println("SEND NEW VALUE")
-            requester.emit {
-                println("GOT NEW VALUE $it")
-                deferred.complete(it)
+        init {
+            println("CONT is null")
+            val collecting = suspend {
+                onStart {
+                    suspendCancellableCoroutine {
+                        cont = it
+                    }
+                }.collect {
+                    println(it)
+                    value = it
+                    suspendCancellableCoroutine {
+                        cont = it
+                    }
+                }
+                value = null
             }
-            println("WAITING FOR NEW VALUE $deferred")
-            val t = deferred.await()
-            println("RETURN NEW VALUE $t")
-            t
-        } else {
-            println("INACTIVE RETURN null")
-            null
+            println("Starting a new coroutine")
+            cont = collecting.createCoroutine(Continuation(context) {
+                it.getOrThrow()
+            })
+        }
+
+        private var value: T? = null
+
+        override fun cancel() {
+            val cont = cont
+            if (cont.isActive) {
+                try {
+                    cont.cancel()
+                } catch (_: CancellationException) {
+                }
+            }
+        }
+
+        override suspend fun next(): T? {
+            println("CALLED NEXT")
+            println("local cont variable $cont")
+            return if (cont.isActive) {
+                cont.resume(Unit)
+                value
+            } else null
         }
     }
-}
 
 fun <T> IteratorAsync<T>.toFlow() = flow {
     while (true) {

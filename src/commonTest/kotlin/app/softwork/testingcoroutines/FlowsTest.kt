@@ -46,28 +46,23 @@ class FlowsTest {
         val called = mutableListOf<Int>()
         val results = mutableListOf<Int>()
 
-        val job = Job()
-        CoroutineScope(job).launch {
-            suspendCancellableCoroutine<Unit> { cont ->
-                val collector = flow {
-                    repeat(3) {
-                        emit(it + 1)
-                        called += it + 1
-                    }
-                }.collecting({
-                    results.add(it)
-                    if (results.size == 2) {
-                        job.cancel()
-                    }
-                }, {
-                    assertNotNull(it)
-                })
-                cont.invokeOnCancellation {
-                    collector.cancel()
+        suspendCancellableCoroutine<Unit> { cont ->
+            val collect = flow {
+                repeat(5) {
+                    emit(it + 1)
+                    called += it + 1
                 }
+            }.collecting({
+                results.add(it)
+                if (results.size == 2) {
+                    currentCoroutineContext().cancel()
+                    cont.resume(Unit)
+                }
+            }, { })
+            cont.invokeOnCancellation {
+                collect.cancel()
             }
-        }.join()
-
+        }
         assertEquals(listOf(1, 2), actual = results)
         assertEquals(listOf(1, 2), actual = called)
     }
@@ -78,7 +73,7 @@ class FlowsTest {
         val expected = flowOf(1, 2, 3).onEach {
             called += it
         }
-        val iterator = expected.asAsyncIterable()
+        val iterator = expected.asAsyncIterable(coroutineContext)
         val values = buildList {
             while (true) {
                 val next = iterator.next() ?: break
@@ -95,17 +90,13 @@ class FlowsTest {
         val expected = flowOf(1, 2, 3).onEach {
             computed += it
         }
-        val iterator = expected.asAsyncIterable()
+        val iterator = expected.asAsyncIterable(coroutineContext)
+        runCurrent()
         val next = iterator.next()
         assertNotNull(next)
         iterator.cancel()
         assertEquals(1, next)
-        assertEquals(
-            listOf(1, 2),
-            computed,
-            "upstream will always emit 1 time because other is a SharedFlow, " +
-                    "so upstream will be called again before waiting for other"
-        )
+        assertEquals(listOf(1), computed)
     }
 
     @Test
@@ -114,7 +105,7 @@ class FlowsTest {
         val expected = flowOf(1, 2, 3).onEach {
             computed += it
         }
-        val iterator = expected.asAsyncIterable()
+        val iterator = expected.asAsyncIterable(coroutineContext)
         iterator.cancel()
         assertEquals(emptyList(), computed)
     }
