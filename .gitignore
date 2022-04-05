@@ -2,3 +2,6 @@
 .idea
 build
 local.properties
+.build
+.swiftpm
+.DS_Store

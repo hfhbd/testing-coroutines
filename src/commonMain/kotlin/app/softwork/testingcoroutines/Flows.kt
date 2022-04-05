@@ -14,11 +14,17 @@ fun <T> Flow<T>.collectingBlocking(action: (T) -> Unit, onCompletion: (Throwable
 fun <T> Flow<T>.collecting(action: suspend (T) -> Unit, onCompletion: (Throwable?) -> Unit): Cancelable {
     val job = Job()
 
-    onEach {
-        action(it)
-    }.onCompletion {
-        onCompletion(it)
-    }.launchIn(CoroutineScope(job))
+    CoroutineScope(job).launch {
+        try {
+            collect {
+                action(it)
+            }
+            onCompletion(null)
+        } catch (e: Throwable) {
+            onCompletion(e)
+            throw e
+        }
+    }
 
     return Cancelable {
         job.cancel()
@@ -36,38 +42,37 @@ public interface IteratorAsync<out T> : Cancelable {
 
 val EmptyContext = EmptyCoroutineContext
 
-fun <T> Flow<T>.asAsyncIterable(context: CoroutineContext = EmptyContext): IteratorAsync<T> = object : IteratorAsync<T> {
-    private var job: Job? = null
-    private val fixForInitDelay = 1
-    private val requester = MutableSharedFlow<(T) -> Unit>(replay = fixForInitDelay)
+fun <T> Flow<T>.asAsyncIterable(context: CoroutineContext): IteratorAsync<T> =
+    object : IteratorAsync<T> {
+        private val scope = CoroutineScope(context)
 
-    override fun cancel() {
-        job?.cancel()
-    }
+        private lateinit var value: CompletableDeferred<T>
 
-    private fun c() = cancel()
-
-    override suspend fun next(): T? {
-        if (job == null) {
-            this.job = onCompletion {
-                c()
-            }.zip(requester) { t, requester ->
-                requester(t)
-            }.launchIn(CoroutineScope(context))
-        }
-        return if (job!!.isActive) {
-            try {
-                val deferred = CompletableDeferred<T>(job)
-                requester.emit { deferred.complete(it) }
-                deferred.await()
-            } catch (_: CancellationException) {
-                null
+        private val collector: Job = scope.launch(start = CoroutineStart.LAZY) {
+            collect {
+                nextCall.join()
+                value.complete(it)
+                nextCall = newJob()
             }
-        } else {
-            null
+            c()
+        }
+        private fun newJob() = Job(collector)
+        private fun c() = cancel()
+        private var nextCall: CompletableJob = Job(collector)
+
+        override fun cancel() {
+            collector.cancel()
+        }
+
+        override suspend fun next(): T? {
+            collector.start()
+            return if (collector.isActive) {
+                value = CompletableDeferred(collector)
+                nextCall.complete()
+                value.await()
+            } else null
         }
     }
-}
 
 fun <T> IteratorAsync<T>.toFlow() = flow {
     while (true) {
