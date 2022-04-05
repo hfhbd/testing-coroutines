@@ -44,48 +44,32 @@ val EmptyContext = EmptyCoroutineContext
 
 fun <T> Flow<T>.asAsyncIterable(context: CoroutineContext): IteratorAsync<T> =
     object : IteratorAsync<T> {
-        private var cont: CancellableContinuation<Unit>
+        private val scope = CoroutineScope(context)
 
-        init {
-            println("CONT is null")
-            val collecting = suspend {
-                onStart {
-                    suspendCancellableCoroutine {
-                        cont = it
-                    }
-                }.collect {
-                    println(it)
-                    value = it
-                    suspendCancellableCoroutine {
-                        cont = it
-                    }
-                }
-                value = null
+        private lateinit var value: CompletableDeferred<T>
+
+        private val collector: Job = scope.launch(start = CoroutineStart.LAZY) {
+            collect {
+                nextCall.join()
+                value.complete(it)
+                nextCall = newJob()
             }
-            println("Starting a new coroutine")
-            cont = collecting.createCoroutine(Continuation(context) {
-                it.getOrThrow()
-            })
+            c()
         }
-
-        private var value: T? = null
+        private fun newJob() = Job(collector)
+        private fun c() = cancel()
+        private var nextCall: CompletableJob = Job(collector)
 
         override fun cancel() {
-            val cont = cont
-            if (cont.isActive) {
-                try {
-                    cont.cancel()
-                } catch (_: CancellationException) {
-                }
-            }
+            collector.cancel()
         }
 
         override suspend fun next(): T? {
-            println("CALLED NEXT")
-            println("local cont variable $cont")
-            return if (cont.isActive) {
-                cont.resume(Unit)
-                value
+            collector.start()
+            return if (collector.isActive) {
+                value = CompletableDeferred(collector)
+                nextCall.complete()
+                value.await()
             } else null
         }
     }

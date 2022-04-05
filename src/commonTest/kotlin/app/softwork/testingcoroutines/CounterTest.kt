@@ -18,7 +18,9 @@ class CounterTest {
         val async = asyncCounter.flow.asAsyncIterable(coroutineContext)
         assertEquals(0, async.next())
         assertEquals(1, async.next())
-        assertEquals(1, asyncCounter.current)
+        val delay = 1
+        assertEquals(1 + delay, asyncCounter.current)
+        async.cancel()
     }
 
     @Test
@@ -77,9 +79,7 @@ class CounterTest {
         }
         repeat(10) {
             flow.value = it
-            println("SET VALUE $it")
             runCurrent()
-            println("AFTER RUNCURRENT $it")
             delay(1.seconds)
         }
         assertEquals(List(10) { it }, results.await())
