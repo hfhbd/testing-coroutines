@@ -1,77 +1,18 @@
 package app.softwork.testingcoroutines
 
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.*
-import kotlin.coroutines.*
 import kotlin.test.*
 
 class FlowsTest {
-
-    @Test
-    fun flowFrom() = runTest {
-        val expected = listOf(1, 2, 3)
-        assertEquals(expected, expected.flowFrom().toList())
-    }
-
-    @Test
-    fun collectTest() = runTest {
-        val called = mutableListOf<Int>()
-        val expected = listOf(1, 2, 3)
-        val results = mutableListOf<Int>()
-
-        suspendCancellableCoroutine<Unit> { cont ->
-            val collector = flow {
-                repeat(3) {
-                    emit(it + 1)
-                    called += it + 1
-                }
-            }.collectingBlocking({
-                results.add(it)
-            }, {
-                assertNull(it)
-                cont.resume(Unit)
-            })
-            cont.invokeOnCancellation {
-                collector.cancel()
-            }
-        }
-
-        assertEquals(expected, actual = results)
-        assertEquals(expected, actual = called)
-    }
-
-    @Test
-    fun collectCancelTest() = runTest {
-        val called = mutableListOf<Int>()
-        val results = mutableListOf<Int>()
-
-        suspendCancellableCoroutine<Unit> { cont ->
-            val collect = flow {
-                repeat(5) {
-                    emit(it + 1)
-                    called += it + 1
-                }
-            }.collecting({
-                results.add(it)
-                if (results.size == 2) {
-                    currentCoroutineContext().cancel()
-                    cont.resume(Unit)
-                }
-            }, { })
-            cont.invokeOnCancellation {
-                collect.cancel()
-            }
-        }
-        assertEquals(listOf(1, 2), actual = results)
-        assertEquals(listOf(1, 2), actual = called)
-    }
-
     @Test
     fun toAsyncTest() = runTest {
         val called = mutableListOf<Int>()
-        val expected = flowOf(1, 2, 3).onEach {
-            called += it
+        val expected = flow {
+            repeat(3) {
+                emit(it)
+                called += it
+            }
         }
         val iterator = expected.asAsyncIterable(coroutineContext)
         val values = buildList {
@@ -80,9 +21,8 @@ class FlowsTest {
                 add(next)
             }
         }
-        assertEquals(listOf(1, 2, 3), values)
-        assertEquals(listOf(1, 2, 3), called)
-        iterator.cancel()
+        assertEquals(listOf(0, 1, 2), values)
+        assertEquals(listOf(0, 1, 2), called)
     }
 
     @Test
@@ -112,7 +52,7 @@ class FlowsTest {
 
     @Test
     fun iterableToFlowTest() = runTest {
-        val iterable = listOf(1, 2, 3).async()
+        val iterable = flowOf(1, 2, 3).asAsyncIterable(coroutineContext)
         assertEquals(listOf(1, 2, 3), iterable.toFlow().toList())
     }
 }
