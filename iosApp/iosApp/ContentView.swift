@@ -12,14 +12,31 @@ struct ContentView: View {
     let viewModel: Counter
 
     @State var counter = 0
+    @State var counter2 = 0
+    @State var counter3 = 0
+    
     var body: some View {
-        Button("\(counter)") {
-            viewModel.state.setValue(counter + 1)
+        Form {
+            Button("\(counter)") {
+                viewModel.increase()
+            }.task {
+                for await i in viewModel.state.stream(Int.self) {
+                    counter = i
+                }
+            }
+            
+            Text("\(counter2)")
+                .task {
+                    for await i in viewModel.state.stream(Int.self) {
+                        counter2 = i
+                    }
+                }
+            
+            Text("\(counter3)")
         }
-            .padding()
             .task {
-                for await i in viewModel.stateFlow.stream(Int.self, context: Dispatchers.shared.Default) {
-                    self.counter = i
+                for await i in viewModel.state.stream(Int.self) {
+                    counter3 = i
                 }
             }
     }
