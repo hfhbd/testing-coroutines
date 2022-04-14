@@ -22,8 +22,6 @@ fun <T> Flow<T>.asAsyncIterable(context: CoroutineContext): IteratorAsync<T> = o
         val started = cont as? CancellableContinuation
         if (started != null && started.isActive) {
             started.resumeWithException(CancellationException("Canceled upon user request"))
-        } else {
-            cont?.resumeWithException(CancellationException("Canceled upon user request"))
         }
     }
 
