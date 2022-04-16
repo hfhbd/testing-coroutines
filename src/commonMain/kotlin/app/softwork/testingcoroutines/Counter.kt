@@ -12,6 +12,19 @@ class Counter {
         _state.getAndUpdate { it + 1 }
     }
 
+    val state2 = state.map {
+        "$it $it"
+    }
+
+    val username = MutableStateFlow("")
+    val password = MutableStateFlow("")
+    val isLonger = password.map {
+        it.length >= 4
+    }
+    val isValid = username.combine(password) { user, password ->
+        user.isNotBlank() && password.isNotBlank()
+    }
+
     var current = 0
         private set
 
