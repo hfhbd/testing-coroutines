@@ -10,10 +10,9 @@ import shared
 
 @main
 struct iosAppApp: App {
-    let viewModel = Counter()
     var body: some Scene {
         WindowGroup {
-            ContentView(viewModel: viewModel)
+            ContentView()
         }
     }
 }

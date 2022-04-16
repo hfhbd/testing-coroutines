@@ -9,41 +9,60 @@ import SwiftUI
 import shared
 
 struct ContentView: View {
-    let viewModel: Counter
-
+    @StateObject var viewModel = Counter()
+    
     @State var counter = 0
     @State var counter2 = 0
-    @State var counter3 = 0
+    @State var twice = ""
+    @State var validLogin = false
+    @State var passwordValid = false
     
     var body: some View {
         Form {
+            TextField("Username", text: viewModel.binding(\.username, t: String.self))
+            TextField("Password", text: viewModel.binding(\.password, t: String.self))
+            Group {
+                if passwordValid {
+                    Text("valid Password")
+                } else {
+                    Text("No valid password")
+                }
+            }.task {
+                for await new in viewModel.isLonger.stream(Bool.self) {
+                    passwordValid = new
+                }
+            }
+            
+            Group {
+                if validLogin {
+                    Text("valid Login")
+                } else {
+                    Text("No valid login")
+                }
+            }.task {
+                for await new in viewModel.isValid.stream(Bool.self) {
+                    validLogin = new
+                }
+            }
+            
             Button("\(counter)") {
                 viewModel.increase()
             }.task {
-                for await i in viewModel.state.stream(Int.self) {
-                    counter = i
+                for await new in viewModel.state.stream(Int.self) {
+                    counter = new
                 }
             }
             
-            Text("\(counter2)")
-                .task {
-                    for await i in viewModel.state.stream(Int.self) {
-                        counter2 = i
-                    }
+            Text("\(counter2)").task {
+                for await new in viewModel.state.stream(Int.self) {
+                    counter2 = new
                 }
-            
-            Text("\(counter3)")
+            }
+            Text(twice).task {
+                for await new in viewModel.state2.stream(String.self) {
+                    twice = new
+                }
+            }
         }
-            .task {
-                for await i in viewModel.state.stream(Int.self) {
-                    counter3 = i
-                }
-            }
-    }
-}
-
-struct Previews_ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView(viewModel: Counter())
     }
 }

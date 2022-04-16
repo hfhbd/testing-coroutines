@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0843F02A2809D84500E60014 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0843F0292809D84500E60014 /* ViewModel.swift */; };
 		08B1B1D127FCF725004CB74F /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08B1B1D027FCF725004CB74F /* Async.swift */; };
 		08D1EF9C27E0C51A00A51C9E /* iosAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08D1EF9B27E0C51A00A51C9E /* iosAppApp.swift */; };
 		08D1EF9E27E0C51A00A51C9E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08D1EF9D27E0C51A00A51C9E /* ContentView.swift */; };
@@ -31,6 +32,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0843F0292809D84500E60014 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		08B1B1D027FCF725004CB74F /* Async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
 		08D1EF9827E0C51A00A51C9E /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		08D1EF9B27E0C51A00A51C9E /* iosAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iosAppApp.swift; sourceTree = "<group>"; };
@@ -78,6 +80,7 @@
 				08D1EF9F27E0C51B00A51C9E /* Assets.xcassets */,
 				08D1EFA127E0C51B00A51C9E /* Preview Content */,
 				08B1B1D027FCF725004CB74F /* Async.swift */,
+				0843F0292809D84500E60014 /* ViewModel.swift */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -178,6 +181,7 @@
 			files = (
 				08D1EF9E27E0C51A00A51C9E /* ContentView.swift in Sources */,
 				08B1B1D127FCF725004CB74F /* Async.swift in Sources */,
+				0843F02A2809D84500E60014 /* ViewModel.swift in Sources */,
 				08D1EF9C27E0C51A00A51C9E /* iosAppApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
