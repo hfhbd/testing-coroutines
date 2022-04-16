@@ -33,6 +33,8 @@
 
 /* Begin PBXFileReference section */
 		0843F0292809D84500E60014 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		0843F02B280AF0E200E60014 /* ci_post_clone.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = ci_post_clone.sh; path = iosApp/ci_scripts/ci_post_clone.sh; sourceTree = "<group>"; };
+		0843F02C280AF0E200E60014 /* ci_pre_xcodebuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = ci_pre_xcodebuild.sh; path = iosApp/ci_scripts/ci_pre_xcodebuild.sh; sourceTree = "<group>"; };
 		08B1B1D027FCF725004CB74F /* Async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
 		08D1EF9827E0C51A00A51C9E /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		08D1EF9B27E0C51A00A51C9E /* iosAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iosAppApp.swift; sourceTree = "<group>"; };
@@ -54,9 +56,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0843F02E280AF0F900E60014 /* ci_scripts */ = {
+			isa = PBXGroup;
+			children = (
+				0843F02B280AF0E200E60014 /* ci_post_clone.sh */,
+				0843F02C280AF0E200E60014 /* ci_pre_xcodebuild.sh */,
+			);
+			name = ci_scripts;
+			sourceTree = "<group>";
+		};
 		08D1EF8F27E0C51A00A51C9E = {
 			isa = PBXGroup;
 			children = (
+				0843F02E280AF0F900E60014 /* ci_scripts */,
 				08D1EFA927E0C54700A51C9E /* Packages */,
 				08D1EF9A27E0C51A00A51C9E /* iosApp */,
 				08D1EF9927E0C51A00A51C9E /* Products */,
