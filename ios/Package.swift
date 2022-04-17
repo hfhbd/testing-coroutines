@@ -11,13 +11,13 @@ let package = Package(
             targets: ["ios"]),
     ],
     dependencies: [
-        .package(name: "shared", path: "../build/XCFrameworks/debug")
+        .package(name: "testing_coroutines", path: "../build/XCFrameworks/debug")
     ],
     targets: [
         .target(
             name: "ios",
             dependencies: [
-              .product(name: "shared", package: "shared"),
+              .product(name: "testing_coroutines", package: "testing_coroutines"),
             ]),
         .testTarget(
             name: "iosTests",

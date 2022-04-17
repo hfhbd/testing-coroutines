@@ -1,4 +1,4 @@
-import shared
+import testing_coroutines
 
 struct FlowStream<T>: AsyncSequence {
     func makeAsyncIterator() -> FlowAsyncIterator {

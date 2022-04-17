@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import shared
+import testing_coroutines
 
 struct ContentView: View {
     @StateObject var viewModel = Counter()

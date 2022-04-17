@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import shared
+import testing_coroutines
 
 @main
 struct iosAppApp: App {
