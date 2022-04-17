@@ -39,7 +39,7 @@
 		08D1EF9D27E0C51A00A51C9E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		08D1EF9F27E0C51B00A51C9E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		08D1EFA227E0C51B00A51C9E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		08D1EFB227E0D27C00A51C9E /* testing_coroutines.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = testing_coroutines.xcframework; path = ../build/XCFrameworks/debug/testing_coroutines.xcframework; sourceTree = "<group>"; };
+		08D1EFB227E0D27C00A51C9E /* testing_coroutines.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = testing_coroutines.xcframework; path = ../build/XCFrameworks/release/testing_coroutines.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
