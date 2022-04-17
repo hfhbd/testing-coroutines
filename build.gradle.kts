@@ -16,7 +16,6 @@ kotlin {
     iosArm64 {
         binaries {
             framework {
-                baseName = "shared"
                 export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
                 xcf.add(this)
             }
@@ -25,7 +24,6 @@ kotlin {
     iosSimulatorArm64 {
         binaries {
             framework {
-                baseName = "shared"
                 export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
                 xcf.add(this)
             }
@@ -66,16 +64,16 @@ tasks.register("generateSPM") {
                     import PackageDescription
 
                     let package = Package(
-                        name: "shared",
+                        name: "testing_coroutines",
                         platforms: [.iOS(.v13)],
                         products: [
                             .library(
-                                name: "shared",
-                                targets: ["shared"]),
+                                name: "testing_coroutines",
+                                targets: ["testing_coroutines"]),
                         ],
                         targets: [
                             .binaryTarget(
-                                name: "shared",
+                                name: "testing_coroutines",
                                 path: "testing_coroutines.xcframework"
                             )
                         ]

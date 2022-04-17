@@ -1,6 +1,6 @@
 import XCTest
 @testable import ios
-import shared
+import testing_coroutines
 
 class iosSPMTests: XCTestCase {
     @MainActor
