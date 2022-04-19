@@ -30,7 +30,7 @@ struct FlowStream<T>: AsyncSequence {
                 iterator.cancel()
             }) {
                 do {
-                    return try await iterator.next() as! T?
+                    return Optional.some(try await iterator.next() as! T)
                 } catch let error as NSError {
                     let kotlinException = error.kotlinException
                     if kotlinException is KotlinCancellationException {
