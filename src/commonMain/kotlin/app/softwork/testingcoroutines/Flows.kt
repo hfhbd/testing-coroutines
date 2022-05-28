@@ -6,7 +6,7 @@ import kotlin.coroutines.*
 
 interface IteratorAsync<out T> {
     /**
-     * Returns the next element in the iteration.
+     * Returns the next element in the iteration or null if the flow was canceled.
      */
     suspend fun next(): T?
 

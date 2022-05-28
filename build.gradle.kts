@@ -16,7 +16,7 @@ kotlin {
     iosArm64 {
         binaries {
             framework {
-                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
+                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
                 xcf.add(this)
             }
         }
@@ -24,7 +24,7 @@ kotlin {
     iosSimulatorArm64 {
         binaries {
             framework {
-                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
+                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
                 xcf.add(this)
             }
         }
@@ -33,13 +33,13 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
             }
         }
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.2")
             }
         }
     }
@@ -59,7 +59,7 @@ tasks.register("generateSPM") {
             }
             output.writeText(
                 """
-                    // swift-tools-version:5.5
+                    // swift-tools-version:5.6
 
                     import PackageDescription
 
