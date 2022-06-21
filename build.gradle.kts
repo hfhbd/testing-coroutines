@@ -16,7 +16,7 @@ kotlin {
     iosArm64 {
         binaries {
             framework {
-                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
+                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
                 xcf.add(this)
             }
         }
@@ -24,7 +24,7 @@ kotlin {
     iosSimulatorArm64 {
         binaries {
             framework {
-                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
+                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
                 xcf.add(this)
             }
         }
