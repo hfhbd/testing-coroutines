@@ -35,7 +35,7 @@ fun <T> Flow<T>.asAsyncIterable(context: CoroutineContext): IteratorAsync<T> = o
         } else {
             val collecting = suspend {
                 collect { t ->
-                    suspendCancellableCoroutine<Unit> {
+                    suspendCancellableCoroutine {
                         value.complete(t)
                         value = CompletableDeferred()
                         cont = it
