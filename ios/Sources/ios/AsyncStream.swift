@@ -24,7 +24,6 @@ struct FlowStream<T>: AsyncSequence {
             self.iterator = iterator
         }
 
-        @MainActor
         func next() async -> T? {
             try! await withTaskCancellationHandler(handler: {
                 iterator.cancel()

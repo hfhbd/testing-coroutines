@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.apple.*
 
 plugins {
     // Apache 2, https://github.com/JetBrains/kotlin/releases/latest
-    kotlin("multiplatform") version "1.7.10"
+    kotlin("multiplatform") version "1.7.20-Beta"
 }
 
 repositories {
@@ -33,7 +33,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
             }
         }
         commonTest {
