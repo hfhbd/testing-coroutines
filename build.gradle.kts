@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.*
 
 plugins {
-    // Apache 2, https://github.com/JetBrains/kotlin/releases/latest
     kotlin("multiplatform") version "1.7.20-Beta"
+    id("app.cash.licensee") version "1.5.0"
 }
 
 repositories {
@@ -43,6 +43,10 @@ kotlin {
             }
         }
     }
+}
+
+licensee {
+    allow("Apache-2.0")
 }
 
 val assembleXCFramework by tasks
