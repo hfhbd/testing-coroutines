@@ -3,7 +3,6 @@ import XCTest
 import testing_coroutines
 
 class iosSPMTests: XCTestCase {
-    @MainActor
     func testBackpressure() async {
         let counter = Counter()
 
@@ -19,7 +18,6 @@ class iosSPMTests: XCTestCase {
         XCTAssertEqual(2, counter.current)
     }
     
-    @MainActor
     func testBackpressureStateFlow() async {
         let counter = Counter()
         
@@ -40,7 +38,6 @@ class iosSPMTests: XCTestCase {
         await collector.value
     }
     
-    @MainActor
     func testBackpressureCounterStateFlowCombined() async {
         let counter = Counter()
         let max5 = Counter.AutoMax(max: 5)

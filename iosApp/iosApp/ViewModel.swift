@@ -10,10 +10,12 @@ import Combine
 import testing_coroutines
 
 extension Counter: ObservableObject {
+    @MainActor
     func binding<T>(_ keyPath: KeyPath<Counter, MutableStateFlow>, t: T.Type) -> Binding<T> where T: Equatable {
         binding(flow: self[keyPath: keyPath], t: t)
     }
     
+    @MainActor
     func binding<T>(flow: MutableStateFlow, t: T.Type) -> Binding<T> where T: Equatable {
         Task {
             let oldValue = flow.value as! T
