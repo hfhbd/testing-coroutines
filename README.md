@@ -6,7 +6,7 @@ Testing `Flow.collect` on iOS with new memory manager.
 
 Collecting on MainThread is still required up to Kotlin 1.7.20. Swift 5.5 async/await and the new `AsyncStream` allows comfortable usage.
 
-Using Kotlin 1.7.20 and `kotlin.native.binary.objcExportSuspendFunctionLaunchThreadRestriction=none`, using the MainThread is not required anymore.
+With Kotlin 1.7.20 and `kotlin.native.binary.objcExportSuspendFunctionLaunchThreadRestriction=none`, using the MainThread is not required anymore.
 
 ## Building
 
