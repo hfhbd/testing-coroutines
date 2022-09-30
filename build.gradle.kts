@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.*
 
 plugins {
-    kotlin("multiplatform") version "1.7.20-RC"
+    kotlin("multiplatform") version "1.7.20"
     id("app.cash.licensee") version "1.5.0"
 }
 
