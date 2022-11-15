@@ -1,7 +1,8 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.*
 
 plugins {
-    kotlin("multiplatform") version "1.7.21"
+    kotlin("multiplatform") version "1.8.0-Beta"
     id("app.cash.licensee") version "1.6.0"
 }
 
@@ -13,7 +14,7 @@ kotlin {
     jvm()
 
     val xcf = XCFramework()
-    iosArm64 {
+    fun KotlinNativeTarget.f() {
         binaries {
             framework {
                 export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
@@ -21,13 +22,17 @@ kotlin {
             }
         }
     }
+    iosArm64 {
+        f()
+    }
     iosSimulatorArm64 {
-        binaries {
-            framework {
-                export("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-                xcf.add(this)
-            }
-        }
+        f()
+    }
+    macosArm64 {
+        f()
+    }
+    macosX64 {
+        f()
     }
 
     sourceSets {
@@ -69,7 +74,7 @@ tasks.register("generateSPM") {
 
                     let package = Package(
                         name: "testing_coroutines",
-                        platforms: [.iOS(.v13)],
+                        platforms: [.iOS(.v13), .macOS(.v11)],
                         products: [
                             .library(
                                 name: "testing_coroutines",

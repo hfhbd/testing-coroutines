@@ -3,24 +3,24 @@
 import PackageDescription
 
 let package = Package(
-    name: "ios",
-    platforms: [.iOS(.v13)],
+    name: "app",
+    platforms: [.iOS(.v13), .macOS(.v11)],
     products: [
         .library(
-            name: "ios",
-            targets: ["ios"]),
+            name: "app",
+            targets: ["app"]),
     ],
     dependencies: [
         .package(name: "testing_coroutines", path: "../build/XCFrameworks/debug")
     ],
     targets: [
         .target(
-            name: "ios",
+            name: "app",
             dependencies: [
               .product(name: "testing_coroutines", package: "testing_coroutines"),
             ]),
         .testTarget(
-            name: "iosTests",
-            dependencies: ["ios"]),
+            name: "appTests",
+            dependencies: ["app"]),
     ]
 )
