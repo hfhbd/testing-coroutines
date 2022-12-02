@@ -4,14 +4,15 @@ import PackageDescription
 
 let package = Package(
     name: "app",
-    platforms: [.iOS(.v13), .macOS(.v11)],
+    platforms: [.iOS(.v13), .macOS(.v10_15), .tvOS(.v13), .watchOS(.v6)],
     products: [
         .library(
             name: "app",
             targets: ["app"]),
     ],
     dependencies: [
-        .package(name: "testing_coroutines", path: "../build/XCFrameworks/debug")
+        .package(name: "testing_coroutines", path: "build/XCFrameworks/release"),
+        .package(name: "testCounter", path: "testCounter/build/XCFrameworks/debug")
     ],
     targets: [
         .target(
@@ -21,6 +22,9 @@ let package = Package(
             ]),
         .testTarget(
             name: "appTests",
-            dependencies: ["app"]),
+            dependencies: [
+                "app",
+                .product(name: "testCounter", package: "testCounter")
+            ]),
     ]
 )

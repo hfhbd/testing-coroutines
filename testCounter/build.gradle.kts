@@ -2,8 +2,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.*
 
 plugins {
-    kotlin("multiplatform") version "1.8.0-Beta"
-    id("app.cash.licensee") version "1.6.0"
+    kotlin("multiplatform")
 }
 
 repositories {
@@ -47,18 +46,7 @@ kotlin {
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
             }
         }
-        commonTest {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(project(":testCounter"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
-            }
-        }
     }
-}
-
-licensee {
-    allow("Apache-2.0")
 }
 
 val assembleXCFramework by tasks
@@ -82,17 +70,17 @@ tasks.register("generateSPM") {
                     import PackageDescription
 
                     let package = Package(
-                        name: "testing_coroutines",
+                        name: "testCounter",
                         platforms: [.iOS(.v13), .macOS(.v10_15), .tvOS(.v13), .watchOS(.v6)],
                         products: [
                             .library(
-                                name: "testing_coroutines",
-                                targets: ["testing_coroutines"]),
+                                name: "testCounter",
+                                targets: ["testCounter"]),
                         ],
                         targets: [
                             .binaryTarget(
-                                name: "testing_coroutines",
-                                path: "testing_coroutines.xcframework"
+                                name: "testCounter",
+                                path: "testCounter.xcframework"
                             )
                         ]
                     )

@@ -4,9 +4,8 @@ import testing_coroutines
 
 class iosSPMTests: XCTestCase {
     func testBackpressure() async {
-        let counter = Counter()
-
-        let stream = counter.flow.stream(Int32.self, context: Dispatchers.shared.Default)
+        let counter = testCounter()
+        let stream = (counter.flow as! any Flow).stream(Int32.self, context: Dispatchers.shared.Default)
         var got = [Int32]()
         for await value in stream {
             got.append(value)
@@ -19,9 +18,9 @@ class iosSPMTests: XCTestCase {
     }
 
     func testBackpressureStateFlow() async {
-        let counter = Counter()
+        let counter = testCounter()
 
-        let stream = counter.state.stream(Int.self, context: Dispatchers.shared.Default)
+        let stream = (counter.state as! any StateFlow).stream(Int.self, context: Dispatchers.shared.Default)
         let collector = Task {
             let iterator = stream.makeAsyncIterator()
             let a = await iterator.next()
@@ -39,10 +38,10 @@ class iosSPMTests: XCTestCase {
     }
 
     func testBackpressureCounterStateFlowCombined() async {
-        let counter = Counter()
-        let max5 = Counter.AutoMax(max: 5)
+        let counter = testCounter()
+        let max5 = testCounter.AutoMax(max: 5)
 
-        let stream = counter.zip(autoMax: max5).stream(Int.self, context: Dispatchers.shared.Default)
+        let stream = (counter.zip(autoMax: max5) as! any Flow).stream(Int.self, context: Dispatchers.shared.Default)
         let iterator = stream.makeAsyncIterator()
 
         let a = await iterator.next()
