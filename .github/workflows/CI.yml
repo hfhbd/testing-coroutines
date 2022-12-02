@@ -26,7 +26,5 @@ jobs:
 
       - name: Build Swift
         run: swift build
-        working-directory: ios
       - name: Run Swift tests
         run: swift test
-        working-directory: ios
